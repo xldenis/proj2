@@ -1,15 +1,23 @@
 import csv
+import numpy as np
+from nltk.probability import FreqDist
 from sklearn.ensemble import RandomForestClassifier
 
 categories = ['math', 'cs', 'stat', 'physics']
 
-training_set = []
-words = []
 
-nothing = {}
+n_features = 1000
+n_samples = 20000
+
+training_set = []
+allwords = []
+normalized_words = []
+text = ''
+
+#nothing = {}
 #bags = [nothing, nothing, nothing, nothing]
 
-allwords = nothing
+#allwords = nothing
 
 train_file = open('/data/train_input.csv', 'rb')
 labels_file = open('/data/train_output.csv', 'rb')
@@ -18,16 +26,37 @@ training_reader = csv.reader(train_file, delimiter=',', quotechar='"')
 label_reader = csv.reader(labels_file, delimiter=',', quotechar='"')
 
 
-for sample, label in zip(training_reader, label_reader):
-    next(training_reader, None)
-    next(label_reader, None)
-    words = sample[1].split(' ')
+#zip(training_reader, label_reader)
+sample = next(training_reader, None)
+label = next(label_reader, None)
 
-    for w in words:
-        allwords[w] = allwords.get(w,0)+1
+for i in range(15000):
+    sample = next(training_reader, None)
+    label = next(label_reader, None)
 
+    text = text + " " + sample[1]
+    
 train_file.close()
 labels_file.close()
+    
+print 'combined all texts...'
+allwords = text.split(" ")
+print 'split em up'
+
+for w in allwords:
+    if w.isalpha():
+        normalized_words.append(w.lower())
+    
+print 'normalized all words'
+fd = FreqDist(normalized_words)
+#most_common = fd.items()[1:1000]
+
+most_common = fd.keys()[0:n_features]
+
+prior_keywords = []
+for p in most_common:
+    prior_keywords.append(p)
+
 
 print 'finished bagging all the words'
 
@@ -37,78 +66,117 @@ labels_file = open('/data/train_output.csv', 'rb')
 training_reader = csv.reader(train_file, delimiter=',', quotechar='"')
 label_reader = csv.reader(labels_file, delimiter=',', quotechar='"')
 
-# bags[0] = dict.fromkeys(allwords, 0)
-# bags[1] = dict.fromkeys(allwords, 0)
-# bags[2] = dict.fromkeys(allwords, 0)
-# bags[3] = dict.fromkeys(allwords, 0)
+next(training_reader, None)
+next(label_reader, None)
 
-features = []
-labels = []
-i = 0
+features = np.zeros((n_samples, n_features))
+labels = np.zeros(n_samples)
 
-for sample, label in zip(training_reader, label_reader):
-    next(training_reader, None)
-    next(label_reader, None)
-        
+dict_features = []
+
+for i in range(n_samples):
+    sample = next(training_reader, None)
+    label = next(label_reader, None)
+    
     words = sample[1].split(' ')
-    
-    features.append(dict.fromkeys(allwords, 0))
-    labels.append(label[1])
-    
-    for w in words:
-        features[i][w] = features[0].get(w,0)+1
-    
-    i = i + 1
-#         if label[1] == 'math':
-#             bags[0][w] = bags[0].get(w,0)+1
-#         elif label[1] == 'cs':
-#             bags[1][w] = bags[1].get(w,0)+1
-#         elif label[1] == 'stat':
-#             bags[2][w] = bags[2].get(w,0)+1
-#         elif label[1] == 'physics':
-#             bags[3][w] = bags[3].get(w,0)+1
 
+    keywords = []
+    for w in words:
+        if w.lower() in prior_keywords:
+            keywords.append(w.lower())
+
+    dict_words = dict.fromkeys(most_common, 0)
+    
+    for w in keywords:
+        dict_words[w] = dict_words[w] + 1
+
+    dict_features.append(dict_words)
+
+    j=0
+    for key in dict_words.iteritems():
+        features[i][j] = key[1]
+        j+=1
+    
+    if label[1] == 'cs':
+        labels[i] = 0
+    elif label[1] == 'physics':
+        labels[i] = 1
+    elif label[1] == 'stat':
+        labels[i] = 2
+    elif label[1] == 'math':
+        labels[i] = 3
+
+    
 print 'finished counting all the words'
-forest = RandomForestClassifier(n_estimators = 100)
+forest = RandomForestClassifier(n_estimators = 200)
 
 print 'training random forest...'
-forest.fit(features, labels)
+forest.fit(features[0:n_samples,:], labels[0:n_samples])
+# output = forest.predict(features[10001:20000])
+# 
+# test = labels[10001:20000]
+# 
+# right = 0
+# 
+# for i in range(len(output)):
+#     if output[i] == labels[10001+i]:
+#         right = right + 1
+# 
+# 
+# 
+# print right
+# print len(output)
 
-print 'extracting test features'
-
-test_file = open('/data/test_input.csv', 'rb')
-test_labels = open('/data/test_output.csv', 'rb')
-
-test_reader = csv.reader(test_file, delimiter=',', quotechar='"')
-test_label_reader = csv.reader(test_labels, delimiter=',', quotechar='"')
-
-test_features = []
-test_labels = []
-
-for sample, label in zip(test_reader, test_label_reader):
-    next(test_reader, None)
-    next(test_label_reader, None)
+# Load test_set
+test_set = []
+with open('/data/test_input.csv', 'rb') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
+    next(reader, None)  # skip the header
+    for sample in reader:        
         
-    words = sample[1].split(' ')
+
+        #extract features
+        words = sample[1].split(' ')
+
+        keywords = []
+        for w in words:
+            if w.lower() in prior_keywords:
+                keywords.append(w.lower())
+
+        dict_words = dict.fromkeys(most_common, 0)
     
-    test_features.append(dict.fromkeys(allwords, 0))
-    test_labels.append(label[1])
-    
-    for w in words:
-        test_features[i][w] = features[0].get(w,0)+1
-    
-    i = i + 1
+        for w in keywords:
+            dict_words[w] = dict_words[w] + 1
 
-print 'done extracting test features'
+        dict_features.append(dict_words)
 
-predicted = forest.fit(test_features)
-
-total = 0
-correct = 0
-
-for p, s in zip(predicted, test_labels):
-    total = total + 1
-    if s == p:
-        correct = correct + 1
+        j=0
+        test_features = np.zeros(n_features)
+        for key in dict_words.iteritems():
+            test_features[j] = key[1]
+            j+=1
+            
+        test_set.append([sample, test_features])
         
-print 'accuracy: {0}'.format(correct/total)
+
+# Write a random category to the csv file for each example in test_set
+output_file = open('/data/test_output.csv', "wb")
+writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL) 
+
+writer.writerow(['id', 'category']) # write header
+for sample in test_set:
+    prediction = forest.predict(sample[1])
+    
+    if prediction == 0:
+        category = 'cs'
+    elif prediction == 1:
+        category = 'physics'
+    elif prediction == 2:
+        category = 'stat'
+    elif prediction == 3:
+        category = 'math'
+
+    row = [sample[0][0], category]
+    writer.writerow(row)
+
+output_file.close()
