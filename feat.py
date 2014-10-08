@@ -1,30 +1,39 @@
 import re
 from collections import defaultdict
 from math import log
+import csv
 
 def strip(abs):
-  stripped = ' '.join([re.match(r'(\w+)' for x in abs.split()])
-
-def calc_tf(corpus):
-  dict = {}
-  for doc in corpus:
-    dict[doc.id] = defaultdict(lambda: 0)
-    for word in strip(doc).split():
-      dict[doc.id][word] += 1
-  dict
+  return ' '.join(re.split('\W+', abs))
 
 def tfidf(corpus):
   tf = {}
   counts = defaultdict(lambda: 0)
-  for doc in corpus:
-    tf[doc.id] = defaultdict(lambda: 0)
-    for word in strip(doc).split():
-      tf[doc.id][word] += 1
-      count[word] += 1
-  tfidf = {}
-  for doc in corpus:
-    tfidf[doc.id] = defaultdict(lambda: 0)
-    for word in tf[doc.id]:
-      tfidf[doc.id][word] = tf[doc.id][word] * log(len(corpus) / counts[word])
-  tfidf
 
+  for doc in corpus:
+    tf[doc['id']] = defaultdict(lambda: 0)
+    for word in strip(doc['abs']).split():
+      tf[doc['id']][word] += 1
+      counts[word] += 1
+  tfidf = {}
+
+  for doc in corpus:
+    tfidf[doc['id']] = defaultdict(lambda: 0)
+    for word in tf[doc['id']]:
+      tfidf[doc['id']][word] = tf[doc['id']][word] * log(len(corpus) / float(1 + counts[word]))
+  return tfidf
+
+def load_training():
+  file = open('train_input.csv','r')
+  reader = csv.reader(file, delimiter=',', quotechar='"')
+  train = []
+  for row in reader:
+    train.append({'id': row[0], 'abs': row[1]})
+  return train
+
+def main():
+  train = load_training()
+  print "TF-IDF test"
+  print tfidf(train)
+
+if  __name__ =='__main__':main()
