@@ -31,6 +31,22 @@ def load_training():
     train.append({'id': row[0], 'abs': row[1]})
   return train
 
+def load_label():
+  file = open('train_output.csv','r')
+  reader = csv.reader(file, delimiter=',', quotechar='"')
+  train = {}
+  for row in reader:
+    train[row[0]] = row[1]
+  return train
+
+def load_test():
+  file = open('test_input.csv','r')
+  reader = csv.reader(file, delimiter=',', quotechar='"')
+  train = []
+  for row in reader:
+    train.append({'id': row[0], 'abs': row[1]})
+  return train
+
 def main():
   train = load_training()
   print "TF-IDF test"
