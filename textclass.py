@@ -1,13 +1,17 @@
 import csv
 import numpy as np
 from nltk.probability import FreqDist
+
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import SGDClassifier
+from sklearn import svm
 
 categories = ['math', 'cs', 'stat', 'physics']
+data_location = '/usr/local/data/adoyle/'
 
-
-n_features = 1000
-n_samples = 20000
+n_features = 2500
+n_samples = 50000
 
 training_set = []
 allwords = []
@@ -19,8 +23,8 @@ text = ''
 
 #allwords = nothing
 
-train_file = open('/data/train_input.csv', 'rb')
-labels_file = open('/data/train_output.csv', 'rb')
+train_file = open(data_location + 'train_input.csv', 'rb')
+labels_file = open(data_location + 'train_output.csv', 'rb')
 
 training_reader = csv.reader(train_file, delimiter=',', quotechar='"')
 label_reader = csv.reader(labels_file, delimiter=',', quotechar='"')
@@ -30,7 +34,7 @@ label_reader = csv.reader(labels_file, delimiter=',', quotechar='"')
 sample = next(training_reader, None)
 label = next(label_reader, None)
 
-for i in range(15000):
+for i in range(20000):
     sample = next(training_reader, None)
     label = next(label_reader, None)
 
@@ -44,14 +48,14 @@ allwords = text.split(" ")
 print 'split em up'
 
 for w in allwords:
-    if w.isalpha():
+    if w.isalpha() and len(w) > 3:
         normalized_words.append(w.lower())
     
 print 'normalized all words'
 fd = FreqDist(normalized_words)
 #most_common = fd.items()[1:1000]
 
-most_common = fd.keys()[0:n_features]
+most_common = fd.keys()[150:n_features]
 
 prior_keywords = []
 for p in most_common:
@@ -60,8 +64,8 @@ for p in most_common:
 
 print 'finished bagging all the words'
 
-train_file = open('/data/train_input.csv', 'rb')
-labels_file = open('/data/train_output.csv', 'rb')
+train_file = open(data_location + 'train_input.csv', 'rb')
+labels_file = open(data_location + 'train_output.csv', 'rb')
 
 training_reader = csv.reader(train_file, delimiter=',', quotechar='"')
 label_reader = csv.reader(labels_file, delimiter=',', quotechar='"')
@@ -108,28 +112,56 @@ for i in range(n_samples):
 
     
 print 'finished counting all the words'
-forest = RandomForestClassifier(n_estimators = 200)
+
 
 print 'training random forest...'
-forest.fit(features[0:n_samples,:], labels[0:n_samples])
-# output = forest.predict(features[10001:20000])
-# 
-# test = labels[10001:20000]
-# 
-# right = 0
-# 
-# for i in range(len(output)):
-#     if output[i] == labels[10001+i]:
-#         right = right + 1
-# 
-# 
-# 
-# print right
-# print len(output)
+forest = RandomForestClassifier(n_estimators = 200)
+forest.fit(features[0:n_samples/2,:], labels[0:n_samples/2])
 
-# Load test_set
+print 'training gnb'
+bayes = GaussianNB()
+bayes.fit(features[0:n_samples/2,:], labels[0:n_samples/2])
+
+print 'training SGD'
+clf = SGDClassifier(loss="hinge", penalty="l2")
+clf.fit(features[0:n_samples/2, :], labels[0:n_samples/2])
+
+print 'training svm'
+svm = svm.SVC()
+svm.fit(features[0:n_samples/2, :], labels[0:n_samples/2])
+
+output_forest = forest.predict(features[n_samples/2+1:n_samples])
+output_bayes = bayes.predict(features[n_samples/2+1:n_samples])
+output_sgd = clf.predict(features[n_samples/2+1:n_samples])
+output_svm = svm.predict(features[n_samples/2+1:n_samples])
+
+
+test = labels[n_samples/2+1:n_samples]
+ 
+right_forest = 0
+right_bayes = 0 
+right_sgd = 0
+right_svm = 0
+
+for i in range(len(output_forest)):
+    if output_forest[i] == test[i]:
+        right_forest = right_forest + 1
+    if output_bayes[i] == test[i]:
+	right_bayes = right_bayes + 1
+    if output_sgd[i] == test[i]:
+	right_sgd = right_sgd + 1
+    if output_svm[i] == test[i]:
+	right_svm = right_svm + 1
+
+
+print right_forest
+print right_bayes
+print right_sgd
+print right_svm
+
+# Load real test_set
 test_set = []
-with open('/data/test_input.csv', 'rb') as csvfile:
+with open(data_location + 'test_input.csv', 'rb') as csvfile:
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     next(reader, None)  # skip the header
     for sample in reader:        
@@ -160,7 +192,7 @@ with open('/data/test_input.csv', 'rb') as csvfile:
         
 
 # Write a random category to the csv file for each example in test_set
-output_file = open('/data/test_output.csv', "wb")
+output_file = open(data_location + 'test_output.csv', "wb")
 writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL) 
 
 writer.writerow(['id', 'category']) # write header
