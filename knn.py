@@ -1,6 +1,7 @@
 from math import sqrt
 from collections import defaultdict
 from feat import *
+from util import *
 from multiprocessing import Pool
 import random
 
@@ -8,6 +9,7 @@ class KNN:
 
   def __init__(self, k, x_train, x_label, ):
     self.tfidf = TFIDF(x_train)
+    random_select(self.tfidf, 1500)
     self.k = k
     self.x_train = x_train
     self.x_label = x_label
@@ -31,7 +33,7 @@ class KNN:
     distances = []
     for doc in self.x_train:
       words_d = self.tfidf.strip(doc['abs']).split()
-      common_words = list(set(words_q).intersection(words_d))
+      common_words = list(set(words_q).intersection(words_d, self.tfidf.indices.keys()))
       if len(common_words) == 0:
         continue
       d_idf = self.tfidf.tfidf.getrow(doc['id'])

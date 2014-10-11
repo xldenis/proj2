@@ -26,6 +26,23 @@ def simple_select(tfidf, dim=1500):
   tfidf.indices = indices
   tfidf.counts = trans
 
+def random_select(tfidf, dim=1500):
+  mat = tfidf.tfidf.tocsc()
+  blocks = []
+  trans = {}
+  indices = {}
+  i = 0  
+
+  for index in random.sample(range(mat.shape[1]), dim):
+    w = tfidf.indices.keys()[index]
+    trans[w] = tfidf.counts[w]
+    indices[w] = i
+    i += 1
+    blocks.append(mat.getcol(tfidf.index(w)))
+  tfidf.tfidf = hstack(blocks)
+  tfidf.indices = indices
+  tfidf.counts = trans
+
 def load_training():
   file = open('train_input.csv','r')
   reader = csv.reader(file, delimiter=',', quotechar='"')
