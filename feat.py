@@ -61,6 +61,7 @@ def main():
   train, labels, true_ids = load_random_subset(1000)
   print "TF-IDF test"
   tf = TFIDF(train)
-  print TFIDF(train)
+  simple_select(tf)
+  print tf.tfidf.shape
 
 if  __name__ =='__main__':main()
