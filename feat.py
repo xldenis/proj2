@@ -34,10 +34,10 @@ class TFIDF:
 
   def query(self, doc):
     tf = self.tf(doc)
-    tfidf = {}
+    tfidf = csr_matrix((1, len(self.indices)))
     for w in self.strip(doc['abs']).split():
       if self.index(w) >= 0:
-        tfidf[self.index(w)] = tf[w] * log(self.tfidf.shape[0]/ float(1 + self.counts[w]))
+        tfidf[0, self.index(w)] = tf[w] * log(self.tfidf.shape[0]/ float(1 + self.counts[w]))
     return tfidf
 
   def calc_tfidf(self, corpus):
