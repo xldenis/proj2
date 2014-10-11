@@ -1,6 +1,7 @@
 from math import sqrt
 from collections import defaultdict
 from feat import *
+from multiprocessing import Pool
 import random
 
 class KNN:
@@ -11,19 +12,8 @@ class KNN:
     self.x_train = x_train
     self.x_label = x_label
 
-  def sim(self,x,d):
-    words_x = self.tfidf.strip(x['abs']).split()
-    words_d = self.tfidf.strip(x['abs']).split()
-    common_words = list(set(words_x).intersection(words_d))
-    if len(common_words) == 0:
-      return 0.0
-    d_idf = self.tfidf.tfidf[d['id']]
-    x_idf = self.tfidf.query(x)
-    num = sum([d_idf[self.tfidf.index(w)] * x_idf[self.tfidf.index(w)] for w in common_words]) 
-    return num / (1+self.norm(d) * self.norm(x))
-
-  def norm(self,doc):
-    return sqrt(sum([v*v for _k,v in self.tfidf.query(doc).iteritems() ]))
+  def norm(self,doc_idf):
+    return sqrt(sum([v*v for v in doc_idf ]))
 
   def classify(self, knn, labels):
     counts = defaultdict(lambda: 0)
@@ -34,27 +24,26 @@ class KNN:
     return k[v.index(max(v))]   
      
   def knn(self, query):
-    x_idf = self.tfidf.query(query)
+    q_idf = self.tfidf.query(query)
     words_q = self.tfidf.strip(query['abs']).split()
-    x_norm = self.norm(x)
+    q_norm = self.norm(q_idf.values())
 
     distances = []
     for doc in self.x_train:
-      words_d = self.tfidf.strip(x['abs']).split()
-      common_words = list(set(words_x).intersection(words_d))
+      words_d = self.tfidf.strip(doc['abs']).split()
+      common_words = list(set(words_q).intersection(words_d))
       if len(common_words) == 0:
         continue
-      d_idf = self.tfidf.tfidf[d['id']]
-      num = sum([d_idf[self.tfidf.index(w)] * x_idf[self.tfidf.index(w)] for w in common_words]) 
-      distances.append((num, doc['id']))
+      d_idf = self.tfidf.tfidf.getrow(doc['id'])
+      num = sum([self.tfidf.tfidf[doc['id'],self.tfidf.index(w)] * q_idf[self.tfidf.index(w)] for w in common_words]) 
+      distances.append((num / (1+self.norm(d_idf.toarray()[0]) * q_norm), doc['id']))
 
-    distances = [(self.sim(query, x), x['id']) for x in self.x_train]
     return self.classify(sorted(distances)[:self.k],self.x_label)
 
 def main():
   print "kNN test"
   print "Loading Training"
-  train = load_training()
+  train2 = load_training()
   print "Loading Labels"
   label = load_label()
   print "Loading Test Data"
@@ -62,7 +51,7 @@ def main():
   train, label, true_ids = load_random_subset(1000)
   print "Building KNN"
   knn = KNN(5, train, label)
-  for i in range(0,10):
-    randDoc = random.choice(train)
-    print  str(true_ids[randDoc['id']])+", " + knn.knn(randDoc)
+  for i in random.sample(range(len(train2)), 100):
+    randDoc = random.choice(train2)
+    print  str(randDoc['id'])+", " + knn.knn(randDoc)
 if  __name__ =='__main__':main()

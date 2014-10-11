@@ -5,9 +5,9 @@ from nltk.stem import PorterStemmer
 from util import *
 
 class TFIDF:
-  STOP_WORDS = ["a", "also", "an", "and", "are", "as", "at", "be", "by", "can", "for", "from", "has", "in", "is", "it", "of", "on", "our", "show", "such", "that", "the", "these", "this", "to", "using", "we", "which", "with"]
-
+  
   def __init__(self,corpus):
+    self.STOP_WORDS = set([ l.strip() for l in open('english.stop')])
     self.counts = self.count_words(corpus)
     self.tfidf  = self.calc_tfidf(corpus)
 
@@ -30,13 +30,14 @@ class TFIDF:
     return counts
 
   def index(self, word):
-    return self.indices[word]
+    return self.indices.get(word, -1)
 
   def query(self, doc):
     tf = self.tf(doc)
     tfidf = {}
     for w in self.strip(doc['abs']).split():
-      tfidf[self.index(w)] = tf[w] * log(self.tfidf.shape[0]/ float(1 + self.counts[w]))
+      if self.index(w) >= 0:
+        tfidf[self.index(w)] = tf[w] * log(self.tfidf.shape[0]/ float(1 + self.counts[w]))
     return tfidf
 
   def calc_tfidf(self, corpus):
