@@ -32,9 +32,7 @@ def labels(classes, weights, tf, doc):
 
   scores = []
   for c in classes:
-    for i in tf.indices.keys():
-      scores.append(counts[i]*weights[c].get(i,0))
-
+    scores.append([counts[i]*weights[c].get(i,0) for i in tf.indices.keys()])
   return classes[scores.index(min(scores))]
 
 def main():
@@ -43,9 +41,13 @@ def main():
   classes = ['physics', 'cs', 'math', 'stats']
 
   tf = feat.TFIDF(data)
+  print "Selecting features"
   util.simple_select(tf)
+  print "Normalizing"
+  tf.normalize()
+  print "Calculating weights"
   w = weights(classes, label, tf.indices.keys(), tf)
-
+  print w['physics']
   for i in random.sample(range(len(train2)), 100):
     randDoc = random.choice(train2)
     print  str(randDoc['id'])+", " + labels(classes,w,tf,randDoc)

@@ -22,7 +22,7 @@ def simple_select(tfidf, dim=1500):
     indices[w] = i
     i += 1
     blocks.append(mat.getcol(tfidf.index(w)))
-  tfidf.tfidf = hstack(blocks)
+  tfidf.tfidf = hstack(blocks).tocsr()
   tfidf.indices = indices
   tfidf.counts = trans
 
@@ -39,7 +39,7 @@ def random_select(tfidf, dim=1500):
     indices[w] = i
     i += 1
     blocks.append(mat.getcol(tfidf.index(w)))
-  tfidf.tfidf = hstack(blocks)
+  tfidf.tfidf = hstack(blocks).tocsr()
   tfidf.indices = indices
   tfidf.counts = trans
 
@@ -68,8 +68,8 @@ def load_label():
     train[row[0]] = row[1]
   return train
 
-def load_test():
-  file = open('test_input.csv','r')
+def load_test(test='test_input.csv'):
+  file = open(test,'r')
   reader = csv.reader(file, delimiter=',', quotechar='"')
   train = []
   next(reader, None) 

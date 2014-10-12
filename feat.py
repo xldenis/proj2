@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from math import log
+from math import log,sqrt
 from nltk.stem import PorterStemmer
 from util import *
 
@@ -13,7 +13,7 @@ class TFIDF:
 
   def strip(self, abs):
     ps = PorterStemmer()
-    return ' '.join([ ps.stem(w) for w in re.findall('\w+', abs.lower()) if w not in self.STOP_WORDS])
+    return ' '.join([ ps.stem(w) for w in re.findall('\w+', abs.lower()) if w not in self.STOP_WORDS and len(w) > 4])
 
   def tf(self, doc):
     freq = defaultdict(lambda: 0)
@@ -57,8 +57,21 @@ class TFIDF:
           tfidf[int(doc['id']), self.indices[word]] = tf[doc['id']][word] * log(len(corpus) / float(1 + self.counts[word]))
     return tfidf.tocsr()
 
+  def norm(self, doc_id):
+    row = self.tfidf.getrow(doc_id).toarray()[0]
+    mag = sum([x**2 for x in row])
+    return 1+sqrt(mag)
+
+  def normalize(self):
+    row, col = self.tfidf.shape
+    for r in range(row):
+      n = self.norm(r)
+      for c in self.tfidf.getrow(r).nonzero():
+        self.tfidf[r,c] /= n
+
 def main():
-  train, labels, true_ids = load_random_subset(1000)
+  # train, labels, true_ids = load_random_subset(1000)
+  train = load_training()
   print "TF-IDF test"
   tf = TFIDF(train)
   simple_select(tf)

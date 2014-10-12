@@ -4,6 +4,7 @@ from feat import *
 from util import *
 from multiprocessing import Pool
 import random
+import sys
 
 class KNN:
 
@@ -28,14 +29,12 @@ class KNN:
   def knn(self, query):
     q_idf = self.tfidf.query(query)
     words_q = self.tfidf.strip(query['abs']).split()
-    q_norm = self.norm(q_idf.values())
-
+    q_norm = self.norm(q_idf.toarray()[0])
+ 
     distances = []
     for doc in self.x_train:
       words_d = self.tfidf.strip(doc['abs']).split()
       common_words = list(set(words_q).intersection(words_d, self.tfidf.indices.keys()))
-      if len(common_words) == 0:
-        continue
       d_idf = self.tfidf.tfidf.getrow(doc['id'])
       num = sum([self.tfidf.tfidf[doc['id'],self.tfidf.index(w)] * q_idf[self.tfidf.index(w)] for w in common_words]) 
       distances.append((num / (1+self.norm(d_idf.toarray()[0]) * q_norm), doc['id']))
@@ -45,15 +44,17 @@ class KNN:
 def main():
   print "kNN test"
   print "Loading Training"
-  train2 = load_training()
-  print "Loading Labels"
+  train = load_training()
   label = load_label()
   print "Loading Test Data"
-  # test  = load_test()
-  train, label, true_ids = load_random_subset(1000)
+  test = load_test(sys.argv[1])
+  # train, label, true_ids = load_random_subset(1000)
   print "Building KNN"
   knn = KNN(5, train, label)
-  for i in random.sample(range(len(train2)), 100):
-    randDoc = random.choice(train2)
-    print  str(randDoc['id'])+", " + knn.knn(randDoc)
+  # for i in random.sample(range(len(train2)), 100):
+  #   randDoc = random.choice(train2)
+  #   print  str(randDoc['id'])+", " + knn.knn(randDoc)
+  for doc in test:
+    print  str(doc['id'])+", " + knn.knn(doc)
+
 if  __name__ =='__main__':main()
