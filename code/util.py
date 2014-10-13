@@ -49,7 +49,7 @@ def load_training():
   train = []
   next(reader, None) 
   for row in reader:
-    train.append({'id': row[0], 'abs': row[1]})
+    train.append({'id': int(row[0]), 'abs': row[1]})
   return train
 
 def load_random_subset(k):
@@ -62,10 +62,10 @@ def load_random_subset(k):
 def load_label():
   file = open('train_output.csv','r')
   reader = csv.reader(file, delimiter=',', quotechar='"')
-  train = {}
+  train = []
   next(reader, None) 
   for row in reader:
-    train[row[0]] = row[1]
+    train.append(row[1])
   return train
 
 def load_test(test='test_input.csv'):

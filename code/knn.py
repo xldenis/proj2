@@ -2,7 +2,6 @@ from math import sqrt
 from collections import defaultdict
 from feat import *
 from util import *
-from multiprocessing import Pool
 import random
 import sys
 

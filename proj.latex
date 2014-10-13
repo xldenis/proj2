@@ -1,0 +1,65 @@
+Introduction
+
+Related Work
+
+Data Pre-processing
+
+We performed a series of simple transforms on the data in an attempt to normalize it and extract the most meaning. These transforms are applied at the document level, and later transforms attempt to rectify corpus level issues. 
+
+Latex Removal
+
+Latex formatting generally takes the form of mathematical expressions expressed between two \$ symbols. The primary issue with latex formatting is that semantically similar phrases can take very different and hard to parse appearances. To remove this kind of formatting we first begin by searching the text for all text between two matched \$ symbols. Afterwards, we replace all instances of mathematical expressions by the symbole $math123$. The purpose of this expression is to show that the text contains mathematical expressions rather than which exact ones are contained. 
+
+Text Normalization
+
+After removing all latex formatting, the text is normalized using standard techniques[cite]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. Finally, a Porter stemmer [cite] is employed to reduce words to their base forms. The Porter stemmer will catch issues like different verb tenses and plurals of words. We found that using the stemmer reduced the size of our vocabulary by approximately 25%. 
+
+Feature Design and Selection
+
+Word Count
+Perf
+
+TF-IDF
+Perf
+
+SVD
+Perf
+
+Random
+Perf
+
+Most Frequent
+Perf
+
+Algorithm Selection
+
+Baseline: Naive Bayes using word counts
+
+Optimization tricks for Naive Bayes
+
+Standard: (Naive Bayes with TF-IDF & Ensemble) and kNN with TF-IDF
+
+Optimization of kNN
+
+Advanced: Random Forests
+
+Parameter Selection
+
+Normalization Length
+
+Vocabulary size
+
+Testing and Validation
+
+k-fold X-Val
+
+ROC
+
+Confusion
+
+Discussion
+
+kNN performance
+
+Difficulty of TF-IDF
+
