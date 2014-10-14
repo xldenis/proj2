@@ -1,7 +1,7 @@
+\begin{document}
 Introduction
 
 Related Work
-\begin{document}
 Introduction
 
 algoritms used, features results
@@ -64,35 +64,60 @@ Most Frequent
 
 This amounts to considering the $k$ most frequent features by term frequency. Of course, this approach has several obvious problems. First, and most obvious is the issue of stop words, words which are frequent but carry little meaning. While TF-IDF will rank these lowly, choosing the $k$ most frequent words will ignore these scores. Second, this method of selection assumes that the most frequent words are most classifiable. It ignores situations where two seperate terms may by highly correlated with half of each class but not in the $k$ most frequent words. These issues can be mitigated by filtering out stop words ahead of time and experimenting with values of $k$ but will never completely disappear.
 
-Algorithm Selection
+# Algorithm Selection
 
-Baseline: Naive Bayes using word counts
+The class of algorithms that are usable during text classification is specific, due to the large feature space. Several types of algorithms have shown good performance in the literature, including: LLSF, Multinomial Naive Bayes, Decision Trees and kNN. Due to ease of implmentation we chose to use Naive Bayes as our baseline algorithm. Naive Bayes is known for high performance in text envirnoments since it's structure allows for easy learning of many features.
 
-Optimization tricks for Naive Bayes
+## Baseline: Naive Bayes using word counts
 
-Standard: (Naive Bayes with TF-IDF & Ensemble) and kNN with TF-IDF
+In order to establish a baseline for future algorithms, the simplest version of Naive Bayes was implemented. Naive Bayes estimates the probability $P(c|w)$ through the use of Bayes Rule.
 
-Optimization of kNN
+\[ \frac {P(c)P(w|c)} {P(w)} \]
 
-Advanced: Random Forests
+While $P(c)$ can be estimated easily by counting the raw occurences of the label $c$ within the training data, $P(w|c)$ requres more work. We estimate $P(w|c)$ through the following formula:
 
-Parameter Selection
+\[\frac {\sum_{d \in D_c} n_{wd}} {\sum_{w'} 2\sum_{d\in D_c} n_{wd}} \]
 
-Normalization Length
+While performing sums is not a very complex task for a computer, calculating the denominator on the entire training set can prohibitive with $O(mn)$ for $m$ features and $n$ documents. To solve this issue, we simply reverse the sums, taking advantage of the sparsity of features within documents. While we keep the same the order-bound, given that a single abstract will not contain more than a few hundred unique words we can expect less iteration in the sums.
 
-Vocabulary size
+## Standard: (Naive Bayes with TF-IDF & Ensemble) and kNN with TF-IDF
 
-Testing and Validation
+For our more `standard' approach, we explored the usage of TF-IDF and other transformations on MBN as well as kNN. Another approach that was considered was Text Weighted Complement Naive Bayes.
 
-k-fold X-Val
+For Naive Bayes, rewriting the algorithm to operate on a two dimensional document-feature matrix rather than the actual class based word counts allows us to change the features. By doing so, we can replace the raw word counts with TF-IDF values. 
 
-ROC
+kNN attempts to search for the $k$ nearest points to the query point. The first step then, is to define some metric (distance) function. For this, we used the cosine similarity of TF-IDF vectors.
 
-Confusion
+\[
+sim(A,B) = \frac {\sum_{w \in A \cap B} A_w \times B_w} {\| A \| \| B \|}
+\]
+Where $A,B$ are TF-IDF vectors. Once the metric function is defined, kNN simply becomes a matter of iterating over the training set to find the $k$ documents with the highest scores. To label a test document, take the most frequent of the labels in the neighborhood and return that. 
 
-Discussion
+The primary issue with kNN is that each query will be computationally expensive. Due to implementation, the trick used in Naive Bayes to reduce the side of iterations couldn't be used requiring an inner loop of 80000. This issue is why feature selection and reduction is paramount in kNN, since it will significantly reduce computation time.
 
-kNN performance
+### Optimization of kNN
 
-Difficulty of TF-IDF
+## Advanced: Random Forests
+
+# Parameter Selection
+
+## Normalization Length
+
+## Vocabulary size
+
+## Testing and Validation
+
+## k-fold X-Val
+
+## ROC
+
+## Confusion
+ 
+# Discussion
+
+## kNN performance
+
+## Difficulty of TF-IDF
+
+
 \end {document}
