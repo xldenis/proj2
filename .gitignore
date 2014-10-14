@@ -1,2 +1,6 @@
 *.csv
 *.pyc
+*.aux
+*.gz
+*.log
+*.fdb_latexmk

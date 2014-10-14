@@ -4,6 +4,7 @@ from util import *
 import random
 from nltk.stem import PorterStemmer
 import re
+import itertools
 
 def strip(doc):
   stop = set([ l.strip() for l in open('english.stop')])
@@ -26,8 +27,6 @@ def _vocab(corpus):
 def word_counts(corpus, ids):
   n = {}
   for d in zip(corpus, ids):
-    if int(d[1]) % 1000 == 0:
-      print d[1]
     n[d[1]] = defaultdict(lambda: 0)
     for w in strip(d[0]):
       n[d[1]][w] += 1
@@ -79,7 +78,6 @@ def train(classes, vocab, corpus, corpus_labels, feats, perClass=False):
   print 'Extracting vocab'
   # vocab = _vocab(corpus[0])[0]
   d = len(corpus[0])
-  print len(vocab)
   probs = {} #probs[c][w] = P(w|c)
   prior = {}
   for c in classes:
@@ -91,16 +89,12 @@ def train(classes, vocab, corpus, corpus_labels, feats, perClass=False):
     probs[c] = defaultdict(lambda:1.0 / len(vocab))
     prior[c] = len(doc_class_ids) / float(d)
     totalCount = 0
-    i = 0
     sum_words = defaultdict(lambda: 0)
+    
     for idx in doc_class_ids:
-      i += 1
-      if i % 1000 == 0:
-        print i
       for w in n[idx].keys():
         totalCount += n[idx][w]
         sum_words[w] += n[idx][w]
-    print totalCount
 
     for w in vocab:
       top = sum_words[w]
@@ -133,25 +127,47 @@ def main():
   corpus = [d['abs'] for d in training]
   ids = [d['id'] for d in training]
   corpus_labels = [labels[d['id']] for d in training]
-  print 'Training'
-  n = word_counts(corpus, ids)
-  print 'Temp Vocab'
-  vocab, df = _vocab(corpus)
-  print 'Calculating TF-IDF'
-  np = normalize_tfidf(n,df,len(corpus))
+  # print 'Training'
+  # n = word_counts(corpus, ids)
+  # print 'Temp Vocab'
+  # vocab, df = _vocab(corpus)
+  # print 'Calculating TF-IDF'
+  # np = normalize_tfidf(n,df,len(corpus))
   # np2 = normalize_class_length(classes, labels, vocab, n)
-  np2 = normalize_tfidf_len(np)
-  c1 = train(classes, vocab, (corpus, ids), corpus_labels, np)
+  # np2 = normalize_tfidf_len(np)
+  # c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
   # c2 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
   # compare(c1, c2, classes, test, labels)
   # measure(c1, classes, test, labels)
-  output(classes, c1)
+  kfold(10, classes, (corpus, ids, corpus_labels))
+  # output(classes, c1)
+
+def kfold(k, classes, data):
+  # data is tuple (text, id, label)
+  # params is list of values to test
+  k_size = int(round(len(data[0])/ k))
+  groups = [data[i:i + k_size] for i in range(0, len(data), k_size)]
+  vocab, df = _vocab(data[0])
+  errors = [0] * k
+  for i in range(0,k):
+    print 'Fold %d' % i
+    test = groups[i]
+    train = list(itertools.chain(*(groups[:i]+groups[i+1:])))
+    n = word_counts(train[0], train_ids[1])
+    c = train(classes, vocab, *train, feats=n)
+    for d in test:
+      pred = label(c, *c, doc=d[0])
+      if pred == d[2]:
+        errors[i] += 1
+    print errors
+  print float(sum(errors))/len(errors)
+
 def measure(c, classes, test, labels):
   print 'Testing'
   correct = 0
   both_wrong = 0
   one_right  = 0
-  errors = defaultdict(lambda:0)
+  errors = defaultdict(lambda:defaultdict(lambda:0))
   test_length = 1000
   for d in test[:test_length]:
     pred,scores = label(classes,*c,doc=d['abs'])
@@ -159,9 +175,9 @@ def measure(c, classes, test, labels):
     if pred == labels[d['id']]:
       correct += 1
     else:
-      errors[labels[d['id']]] +=1
+      errors[labels[d['id']]][pred] += 1
       # print "%s %s" % (d['id'], scores)
-  print "Got %s correct of %s" % (correct, test_length)  
+  # print "Got %s correct of %s" % (correct, test_length)  
   print errors
 
 def compare(c1,c2, classes, test, labels):
