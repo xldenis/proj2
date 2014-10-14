@@ -1,15 +1,31 @@
 \begin{document}
 Introduction
 
-Related Work
-Introduction
-
-algoritms used, features results
+Categorization of articles in scientific journals is a useful step towards making it easy for future researchers to find and build upon the body of knowledge in their field.  Normally, it is fairly obvious to a human editor how to categorize a new article, so an automated system to classify documents is unnecessary.  However, with the rise of open access journals, more and more articles are being indexed into journals other than the ones they were published in, which might use a different categorization scheme.  When a one-to-one mapping of categories is impossible, it can be time-consuming to review large numbers of articles and find a suitable category from within the new categorization.
 
 Related Work
 
-20newgroups
-reuters
+The problem of automatic text classification using machine learning has been extensively studied on several datasets, including the 20 Newsgroups dataset and the Reuters dataset.  The 20 Newsgroups dataset included a collection of almost 20,000 newsgroup threads from twenty different categories.  Some of the categories are closely related, such as "rec.sport.baseball" and "rec.sport.hockey", and some categories have nothing to do with the others, such as "misc.forsale".
+
+@inproceedings{Lang95
+,author = "Ken Lang"
+,title = "Newsweeder: Learning to filter netnews"
+,year = 1995
+,booktitle = "Proceedings of the Twelfth International Conference on Machine Learning"
+,pages = "331-339"
+}
+Lang, Ken.  "Newsweeder: Learning to filter netnews".  Proceedings of the Twelfth International Conference on Machine Learning", p. 331-339, 1995.
+
+The Reuters-21578 dataset provides a similar number of news articles with corresponding categories for machine learning research.  Released in 1990, it provides a different type of text, given that the 20 Newsgroups are dicussions from internet users and the Reuters articles are news broadcasts not meant for interaction.  The Reuters-21578 dataset has been superceded by the RCV1 dataset, which contains over 800,000 labeled news articles.
+
+Reuters Corpus, Volume 1, English language, 1996-08-20 to 1997-08-19
+(Release date 2000-11-03, Format version 1, correction level 0)
+
+Philip J. Hayes and Steven P. Weinstein. "CONSTRUE/TIS: A System for Content-Based Indexing of a Database of News Stories." Second Annual Conference on Innovative Applications of Artificial Intelligence, 1990. 
+
+The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.
+
+
 all mnb papers
 knn papers
 tfidf papers
