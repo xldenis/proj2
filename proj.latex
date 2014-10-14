@@ -1,6 +1,20 @@
 Introduction
 
 Related Work
+\begin{document}
+Introduction
+
+algoritms used, features results
+
+Related Work
+
+20newgroups
+reuters
+all mnb papers
+knn papers
+tfidf papers
+svd papers
+
 
 Data Pre-processing
 
@@ -12,24 +26,43 @@ Latex formatting generally takes the form of mathematical expressions expressed 
 
 Text Normalization
 
-After removing all latex formatting, the text is normalized using standard techniques[cite]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. Finally, a Porter stemmer [cite] is employed to reduce words to their base forms. The Porter stemmer will catch issues like different verb tenses and plurals of words. We found that using the stemmer reduced the size of our vocabulary by approximately 25%. 
+After removing all latex formatting, the text is normalized using standard techniques[cite]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. Finally, a Porter stemmer [cite] is employed to reduce words to their base forms. The Porter stemmer will catch issues like different verb tenses and plurals of words. We found that using the stemmer reduced the size of our vocabulary by approximately $25\%$. 
 
 Feature Design and Selection
 
+We considered two sets of features: word count and TF-IDF. 
+
 Word Count
+
+This feature vector is simple, consisting of the word counts $n_{wd}$ by word and document. From this set of features we count the instances of words across an entire class. In Naive Bayes we use this to estimate $P(w | c)$ for every word $w$ and class $c$. Besides normalization of words, there is no secondary selection that happens when using raw word counts. 
+
 Perf
 
 TF-IDF
+
+TF-IDF, calculates $n'_{wd} = \log(n_{wd} + 1) \times log(|D|/df(w))$ where $df(\cdot)$ is the _document frequency_ of a word, or the number of documents containing a word. The purpose of this transformation is to compensate for the influence of common words and emphasize the influence of rare ones in word counts. While TF-IDF can compensate for rare and frequent words it still doesn't adjust for disparities in document length. We compensate for document length by dividing the document vectors with the average document length, according to the $L_2$ Norm.
+
 Perf
+
+A second transformation that was explored is a class-length prior distribution for word frequencies. This means that word frequencies for each class were scaled by the total word count within the class. The purpose of this rescaling is to consider the words in a manner purely relative to their own class, rather than in comparison to other classes.
+
+Perf
+
+When dealing with kNN the dimensionality of our vector space becomes an issue. Though the metric accomodates higher dimensions more easily, when faced with the dimensions of the word space, some form of feature selection is required. To this end, multiple different options were considered.   
 
 SVD
-Perf
+
+SVD or singular value decomposition is a technique that will break a matrix $M$ into three matrices $U, S, V^T$ such that $U \cdot S \cdot V^T = M$. The use of SVD in feature selection is that reducing the rank of the diagonal matrix $S$ to $k$, it will produce the closest matrix $M'$ of degree $k$ to $M$. By interpretting the feature vectors as a document-feature matrix, or in this case as a tfidf matrix, we can find the best features. 
+
+The primary issue with SVD is that allowable python packages for this project do not have very efficient implementations. Calculating the SVD for a matrix of 96000 rows by approximately 88000 columns took approximately 1 hour and required several gigabytes of ram to store the three output matrices. Additionally, since our kNN implementation suffered performance issues adding matrix multiplication to each distance calculation would further reduce throughput.
 
 Random
-Perf
+
+Random or heuristic approaches can yield interesting results in many situations. In this case, $k$ features were chosen at random and used during kNN. Combined with algorithms such as gradient descent or cross-validation, this can yield interesting results. However, due to time constraints, gradient descent was not implemented and cross-validation did not yield interesting results in the alloted time.
 
 Most Frequent
-Perf
+
+This amounts to considering the $k$ most frequent features by term frequency. Of course, this approach has several obvious problems. First, and most obvious is the issue of stop words, words which are frequent but carry little meaning. While TF-IDF will rank these lowly, choosing the $k$ most frequent words will ignore these scores. Second, this method of selection assumes that the most frequent words are most classifiable. It ignores situations where two seperate terms may by highly correlated with half of each class but not in the $k$ most frequent words. These issues can be mitigated by filtering out stop words ahead of time and experimenting with values of $k$ but will never completely disappear.
 
 Algorithm Selection
 
@@ -62,4 +95,4 @@ Discussion
 kNN performance
 
 Difficulty of TF-IDF
-
+\end {document}

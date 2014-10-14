@@ -1,4 +1,4 @@
-from math import log
+from math import log, sqrt
 from collections import defaultdict
 from util import *
 import random
@@ -46,25 +46,46 @@ def normalize_tfidf(n, df, d):
         np[doc][w] = t
   return np
 
-def normalize_class_length(c, labels, vocab, n):
+def normalize_tfidf_len(n):
   np = {}
-  tot = 0
-  for d in n.keys():
-    if labels[d] == c:
-      for w in n[d].keys():
-        tot += n[d][w]
-  for d in n.keys():
-    for w in n[d].keys():
-      np[d][w] = float(n[d][w]) / tot
+  avg = 0
+  for doc in n.keys():
+    avg += sqrt(sum([n[doc][x]**2 for x in n[doc].keys()]))
+  avg /= len(n.keys())
+  print avg
+  for doc in n.keys():
+    np[doc] = defaultdict(lambda:0)
+    for w in n[doc].keys():
+      if n[doc][w] > 0:
+        np[doc][w] = n[doc][w] / avg
+  return np
 
-def train(classes, vocab, corpus, corpus_labels, n):
+def normalize_class_length(classes, labels, vocab, n):
+  np = {}
+  for c in classes:
+    tot = 0
+    np[c] = {}
+    for d in n.keys():
+      if labels[d] == c:
+        for w in n[d].keys():
+          tot += n[d][w]
+    for d in n.keys():
+      np[c][d] = defaultdict(lambda:0)
+      for w in n[d].keys():
+        np[c][d][w] = float(1000*n[d][w]) / tot
+  return np
+
+def train(classes, vocab, corpus, corpus_labels, feats, perClass=False):
   print 'Extracting vocab'
   # vocab = _vocab(corpus[0])[0]
   d = len(corpus[0])
   print len(vocab)
   probs = {} #probs[c][w] = P(w|c)
   prior = {}
-  for c in classes: 
+  for c in classes:
+    n = feats
+    if perClass:
+      n = feats[c]
     print 'Training %s' % c
     doc_class_ids = [x[1] for x in zip(corpus_labels, corpus[1]) if x[0] == c]
     probs[c] = defaultdict(lambda:1.0 / len(vocab))
@@ -101,11 +122,11 @@ def main():
   classes = ['physics', 'cs', 'math', 'stat']
 
   total = load_training()
-  # random.shuffle(total)
+  random.shuffle(total)
   labels = load_label()
-  frac_train = int(len(total)*(.95))
+  frac_train = int(len(total)*(1.0))
   print frac_train
-  training = total[:frac_train][:40000]
+  training = total[:frac_train]
   test = total[frac_train:]
 
   print 'Extracting Corpus'
@@ -118,11 +139,13 @@ def main():
   vocab, df = _vocab(corpus)
   print 'Calculating TF-IDF'
   np = normalize_tfidf(n,df,len(corpus))
+  # np2 = normalize_class_length(classes, labels, vocab, n)
+  np2 = normalize_tfidf_len(np)
   c1 = train(classes, vocab, (corpus, ids), corpus_labels, np)
-  # c2 = train(classes, vocab, (corpus, ids), corpus_labels, n)
+  # c2 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
   # compare(c1, c2, classes, test, labels)
-  measure(c1, classes, test, labels)
-  # output(classes, c1)
+  # measure(c1, classes, test, labels)
+  output(classes, c1)
 def measure(c, classes, test, labels):
   print 'Testing'
   correct = 0
