@@ -1,0 +1,6 @@
+To run the classifers install relevant python libs (nltk). 
+Unpack the data into the directory.
+Then run the command:
+
+python mnb2.py
+

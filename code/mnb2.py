@@ -123,7 +123,7 @@ def main():
   test_corpus = [d['abs'] for d in test_data]
   frac_train = int(len(total)*1.0)
   print frac_train
-  training = total[:frac_train][:1000]
+  training = total[:frac_train]
   test = total[frac_train:]
 
   print 'Extracting Corpus'
@@ -133,13 +133,13 @@ def main():
   print 'Training'
   n = word_counts(corpus, ids)
   print 'Temp Vocab'
-  vocab, df = _vocab(corpus+test_corpus)
+  vocab, df = _vocab(test_corpus)
   print 'Calculating TF-IDF'
   # np = normalize_tfidf(n,df,len(corpus))
   # np2 = normalize_class_length(classes, labels, vocab, n)
   # np2 = normalize_len(np)
   c1 = train(classes, vocab, (corpus, ids), corpus_labels, n)
-  measure(c1, classes, test, labels)
+  # measure(c1, classes, test, labels)
   # gen = kfold(10, classes, (corpus, ids, corpus_labels))
   # for t_data, t_ids, t_labs, test in gen:
   #   vocab, df = _vocab(corpus)
@@ -152,7 +152,7 @@ def main():
   #   for doc in test:
   #     labels.append(label(classes, *c, doc=doc)[0])
   #   print gen.send(labels)
-  # output()
+  output(classes, c1)
 def kfold(k, classes, data):
   # data is tuple (text, id, label)
   # params is list of values to test
@@ -183,7 +183,7 @@ def measure(c, classes, test, labels):
   correct = 0
   both_wrong = 0
   one_right  = 0
-  errors = defaultdict(lambda:defaultdict(lambda:0))
+  errors = defaultdict(lambda:0)
   test_length = len(test)
   # print len(test)
   for d in test[:test_length]:
@@ -191,10 +191,12 @@ def measure(c, classes, test, labels):
     # print pred
     if pred == labels[d['id']]:
       correct += 1
-    errors[labels[d['id']]][pred] += 1
+    else:
+      errors[labels[d['id']]] += 1
       # print "%s %s" % (d['id'], scores)
   # print "Got %s correct of %s" % (correct, test_length)  
   print errors
+  print len(test)
 
 def compare(c1,c2, classes, test, labels):
   print 'Testing'
