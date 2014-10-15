@@ -3,6 +3,11 @@
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
+\addbibresource{citations.bib}
+\usepackage{multicol}% http://ctan.org/pkg/multicols
+
+\title {Multi-Class Classification of Reddit comments}
+\author {Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
 \section*{Abstract}
@@ -79,7 +84,7 @@ While $P(c)$ can be estimated easily by counting the raw occurences of the label
 
 While performing sums is efficient for a computer, calculating the denominator on the entire training set can prohibitive with $O(mn)$ for $m$ features and $n$ documents. To solve this issue, the sums are reversed, taking advantage of the sparsity of features within documents. While the same order-bound is preserved, given that a single abstract will not contain more than a few hundred unique words, less iterations are expected.
 
-\subsection*{Standard: (Naive Bayes with TF-IDF \& Ensemble) and kNN with TF-IDF}
+\subsection*{Standard: Naive Bayes with TF-IDF and kNN with TF-IDF}
 
 For the `standard' approach, the use of TF-IDF features was explored with multinomial naive bayes and k-Nearest Neighbours classifiers. Another approach considered was Text Weighted Complement Naive Bayes.
 
@@ -106,11 +111,17 @@ The classifiers used in this study have few parameters to select, and the most i
 
 For the kNN classifier, the number of closest training samples, $k$, could be tuned through cross-validation, but due to the time required to classify even one document, a full k-fold validation of this parameter was not performed.
 
-\subsection*{Normalization Length}
+Given enough time and resources however, here are some of the most interesting parameters that could be tested.
+
+\subsection*{Feature Vector Length}
+
+The length of each feature vector can be normalized to a specific length. Doing so allows to consider each feature relative to the document it was a part of, rather than the absolute corpus. A side effect is correction for documents of varying lengths since each vector will add up to the same value under the norm used.
 
 \subsection*{Vocabulary size}
 
-\subsection*{Testing and Validation}
+Algorithms such as kNN suffer heavily from dimensionality, with performance dropping dramatically as the number of dimensions grows. In text classification, the number of features can easily reach over a hundred thousand, and kNN would be rendered useless. Trimming the size of the word dictionary used can force specific words to be emphasized.
+
+\subsection{Testing and Validation}
 
 \subsection*{k-fold X-Val}
 
@@ -118,6 +129,7 @@ ROC
 
 \includegraphics[width=0.5\textwidth]{./confusion.png}
 \includegraphics[width=0.5\textwidth]{./word_frequency.png}
+
 \section*{Discussion}
 
 Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
@@ -132,7 +144,7 @@ While kNN is known for slow querying speed, the actual speed was not expected to
 
 \subsection*{Difficulty of TF-IDF}
 
-While TF-IDF can seem like a silver bullet when dealing with unfiltered word counts, it can actual bring it's own issues. The first is that it can add a decent amount of additional work if document frequencies are calculated as their own step. Computation times can be annoying but are easily dealt with through more advanced hardware. The most important issue however, is that if words are not tokenized properly and many unique words are introduced, then scores can become problematic. Additionally, by forcing Naive Bayes to use 
+While TF-IDF can seem like a silver bullet when dealing with unfiltered word counts, it can actual bring it's own issues. The first is that it can add a decent amount of additional work if document frequencies are calculated as their own step. Computation times can be annoying but are easily dealt with through more advanced hardware. The most important issue however, is that if words are not tokenized properly and many unique words are introduced, then scores can become problematic. Additionally, by forcing Naive Bayes to use a possibly transformed \emph{document-feature} matrix, more work is required to count the class frequencies required.
 
 \section*{Future Work}
 
