@@ -8,7 +8,7 @@
 \usepackage{multicol}% http://ctan.org/pkg/multicols
 
 \title {Multi-Class Classification of Scientific Articles}
-\author {Xavier Denis, Andrew Doyle, Kashif Javed}
+\author {Team Awesome: Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
 \maketitle
@@ -22,9 +22,9 @@ Categorization of articles in scientific journals is a useful step towards makin
 
 \section*{Related Work}
 
-The problem of automatic text classification using machine learning has been extensively studied on several datasets, including the 20 Newsgroups dataset and the Reuters dataset.  The 20 Newsgroups dataset included a collection of almost 20,000 newsgroup threads from twenty different categories.  Some of the categories are closely related, such as ``rec.sport.baseball'' and ``rec.sport.hockey'', and some categories have nothing to do with the others, such as ``misc.forsale''.
+The problem of automatic text classification using machine learning has been extensively studied on several datasets, including the 20 Newsgroups dataset and the Reuters dataset.  The 20 Newsgroups dataset included a collection of almost 20,000 newsgroup threads from twenty different categories.  Some of the categories are closely related, such as ``rec.sport.baseball'' and ``rec.sport.hockey'', and some categories have nothing to do with the others, such as ``misc.forsale''. \cite{20news, Lang95}
 
-The Reuters-21578 dataset provides a similar number of news articles with corresponding categories for machine learning research.  Released in 1990, it provides a different type of text, given that the 20 Newsgroups are dicussions from internet users and the Reuters articles are news broadcasts not meant for interaction.  The Reuters-21578 dataset has been superceded by the RCV1 dataset, which contains over 800,000 labeled news articles.
+The Reuters-21578 dataset provides a similar number of news articles with corresponding categories for machine learning research.  Released in 1990, it provides a different type of text, given that the 20 Newsgroups are dicussions from internet users and the Reuters articles are news broadcasts not meant for interaction.  The Reuters-21578 dataset has been superceded by the RCV1 dataset, which contains over 800,000 labeled news articles. \cite{Reut00}
 
 The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.  The prediction task is to classify each abstract as a computer science, physics, statistics, or math paper.
 
@@ -38,7 +38,7 @@ Mathematical equations in latex generally appear as a mathematical expression be
 
 \subsection*{Text Normalization}
 
-After removing all latex formatting, the text is normalized using standard techniques[\cite{sproat2001normalization}]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.  Figure 1 shows the 20 most frequent words in the dataset longer than 3 characters, including stop words, and with the possible exception of ``algorithm'', none of them are very indicative of a categorical context.
+After removing all latex formatting, the text is normalized using standard techniques \cite{sproat2001normalization}. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.  Figure 1 shows the 20 most frequent words in the dataset longer than 3 characters, including stop words, and with the possible exception of ``algorithm'', none of them are very indicative of a categorical context.
 
 \begin{figure}
   \centering
@@ -51,7 +51,7 @@ After raw data was pre-processed using the above steps, two sets of features wer
 
 \subsection*{Word Count}
 
-This type of feature is simple, consisting of the word counts $n_{wd}$ in each document for all words. From this set of features, the instances of words across an entire class can easily be computed, and used in Naive Bayes classification to estimate $P(w | c)$ for every word $w$ and class $c$. The set of all words, even after stemming and filtering, was too large to be used in the scikit-learn classifiers, so several strategies were employed to select the best word counts.  First, the 2000 most frequently appearing words were selected, and found to give fairly good performance with the scikit-learn random forest classifier.  A qualitative assessment of these words assessed that many of the most common words contained no semantic information, and that the optimal feature set might lie with less frequent words that appeared in only one of the classes, so an arbitrary number of most frequent features was skipped, and the next 2000 features used.  This was found to decrease the quality of prediction, but an exhaustive search of the feature space was not performed due to the promise of TF-IDF features.
+This type of feature is simple, consisting of the word counts $n_{wd}$ in each document for all words. From this set of features, the instances of words across an entire class can easily be computed, and used in Naive Bayes classification to estimate $P(w | c)$ for every word $w$ and class $c$. The set of all words, even after stemming and filtering, was too large to be used in the scikit-learn classifiers, so several strategies were employed to select the best word counts.  First, the 2,000 most frequently appearing words were selected, and found to give fairly good performance with the scikit-learn random forest classifier.  A qualitative assessment of these words assessed that many of the most common words contained no semantic information, and that the optimal feature set might lie with less frequent words that appeared in only one of the classes, so an arbitrary number of most frequent features was skipped, and the next 2,000 features used.  This was found to decrease the quality of prediction, but an exhaustive search of the feature space was not performed due to the promise of TF-IDF features.
 
 \subsection*{TF-IDF}
 
@@ -112,21 +112,13 @@ The primary difficulty with kNN is that each query will be computationally expen
 
 Random forests have produced excellent results in many classification contexts. The scikit-learn random forest classifier, using the 1,500 most frequent word counts as features, classified the test set with $82\%$ accuracy. To obtain this result, only 50,000 of the ~70,000 available training examples were used because of memory limitations, with 150 estimator trees.  Increasing the number of training samples used, the number of features, and the number of trees should improve accuracy, but this was the best result obtainable with the resources available.  An earlier trial, using 10,000 training samples, 100 trees and 1000 features scored $78\%$.
 
-Random forests were not applied to the TF-IDF feature type because of an incompatibility in they way data was stored.
+Random forests could not be applied to the TF-IDF feature type because of an incompatibility in they way data was stored.
 
 \section*{Parameter Selection}
 
 The classifiers used in this study have few parameters to select, and the most important factor that affected classification was the type of features selected. Increasing the number of features used with Naive Bayes and the Random Forest classifiers improved performance, but were not maximized due to time and technical considerations.
 
 For the kNN classifier, the number of closest training samples, $k$, could be tuned through cross-validation, but due to the time required to classify even one document, a full k-fold validation of this parameter was not performed.
-
-\subsection*{Future Work}
-
-Changing the implementation of the Random Forest word frequency feature to use sparse matrices could allow use of all training data and increase the number of features considered.  
-
-\subsection*{Normalization Length}
-
-Given enough time and resources however, here are some of the most interesting parameters that could be tested.
 
 \subsection*{Feature Vector Length}
 
@@ -135,10 +127,6 @@ The length of each feature vector can be normalized to a specific length. Doing 
 \subsection*{Vocabulary size}
 
 Algorithms such as kNN suffer heavily from dimensionality, with performance dropping dramatically as the number of dimensions grows. In text classification, the number of features can easily reach over a hundred thousand, and kNN would be rendered useless. Trimming the size of the word dictionary used can force specific words to be emphasized.
-
-\subsection{Testing and Validation}
-
-\subsection*{k-fold X-Val}
 
 \begin{figure}
   \centering
@@ -168,11 +156,11 @@ Overall, classification was relatively accurate with an $87\%$ TP rate acheived 
 
 \subsection*{Statistics Confusion}
 
-Additionally, as the ROC curve shows, there is an issue classifying the statistics papers. Investigating the source of this issue could have led to reducing error rates dramatically. Two possible sources of confusion could be undersampling in Statistics and high correlation between Statistics and CS vocabularies.
+Additionally, as the confusion matrix in Figure 2 shows, there is an issue classifying the statistics papers. Investigating the source of this issue could have led to reducing error rates dramatically. Two possible sources of confusion could be undersampling in Statistics and high correlation between Statistics and CS vocabularies.
 
 \subsection*{kNN performance}
 
-While kNN is known for slow querying speed, the actual speed was not expected to be so low. This low throughput limited the exploration of kNN since the Python implementation took an estimated 23 hours to generate a Kaggle submission. For this reason, many of the interesting optimizations and choices with kNN were glossed over. Literature reviews suggest that given resources and time to run the actual algorithm performance can be quite high[cite].
+While kNN is known for slow querying speed, the actual speed was not expected to be so low. This low throughput limited the exploration of kNN since the Python implementation took an estimated 23 hours to generate a Kaggle submission. For this reason, many of the interesting optimizations and choices with kNN were glossed over. Literature reviews suggest that given resources and time to run the actual algorithm performance can be quite high[\cite{tan2006effective}].
 
 \subsection*{Difficulty of TF-IDF}
 
