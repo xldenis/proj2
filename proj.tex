@@ -137,6 +137,20 @@ ROC
   \includegraphics[width=0.5\textwidth]{./word_frequency.png}
   \label{freq}
 \end{figure}
+\begin{figure}
+  \centering
+  \begin{tabular}{|l || r|}
+  \hline
+  Feature & Mis-Classifcation\\
+  \hline
+  Word Count     & 0.133135848664 \\
+  TF-IDF         & 0.146835048332 \\
+  TF-IDF$_a$     & 0.149942833385 \\
+  Word Count$_a$ & 0.145837231057 \\
+  \hline
+  \end{tabular}
+  \caption {Mis-Classification rates for different features used by Naive Bayes. The $a$ subscript indicates that the feature vectors were length normalized. All values were calculated after 10-fold cross-validation on the entire training set.}
+\end{figure}
 \section*{Discussion}
 
 Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
