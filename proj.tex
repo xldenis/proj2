@@ -127,10 +127,16 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
 \subsection*{k-fold X-Val}
 
 ROC
-
-\includegraphics[width=0.5\textwidth]{./confusion.png}
-\includegraphics[width=0.5\textwidth]{./word_frequency.png}
-
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./confusion.png}
+  \label{confusion}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./word_frequency.png}
+  \label{freq}
+\end{figure}
 \section*{Discussion}
 
 Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
