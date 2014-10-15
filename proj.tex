@@ -7,7 +7,7 @@
 \addbibresource{citations.bib}
 \usepackage{multicol}% http://ctan.org/pkg/multicols
 
-\title {Multi-Class Classification of Scientific Articles}
+\title {(Team) Awesome Multi-Class Classification of Scientific Articles}
 \author {Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
@@ -42,12 +42,13 @@ Mathematical equations in latex generally appear as a mathematical expression be
 
 \subsection*{Text Normalization}
 
-After removing all latex formatting, the text is normalized using standard techniques[\cite{sproat2001normalization}]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.  Figure 1 shows the 20 most frequent words in the dataset longer than 3 characters, including stop words, and with the possible exception of ``algorithm'', none of them are very indicative of a categorical context.
+After removing all latex formatting, the text is normalized using standard techniques[\cite{sproat2001normalization}]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.  Figure \ref{freq} shows the 20 most frequent words in the dataset longer than 3 characters, including stop words, and with the possible exception of ``algorithm'', none of them are very indicative of a categorical context.
 
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{./word_frequency.png}
   \label{freq}
+  \caption{Histogram of the word counts for the top 20 most frequent words within the training data.}
 \end{figure}
 \section*{Feature Design and Selection}
 
@@ -146,14 +147,14 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
   \centering
   \includegraphics[width=0.5\textwidth]{./confusion.png}
   \label{confusion}
-  \caption{The rows correspond to the lables \{Math, Physics, Statistics, CS\}.}
+  \caption{The rows correspond to the lables \{CS, Statistics, Physics, Math\} labelled from bottom to top. The columns are labeled the same way from left to right. }
 \end{figure}
 
 \begin{figure}
   \centering
   \begin{tabular}{|l || r|}
   \hline
-  Feature & Mis-Classifcation\\
+  Feature & Mis-Classifcation Rate\\
   \hline
   Word Count     & 0.133135848664 \\
   TF-IDF         & 0.146835048332 \\
