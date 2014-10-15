@@ -3,6 +3,12 @@
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
 \usepackage[utf8]{inputenc}
+\usepackage[style=ieee]{biblatex}
+\addbibresource{citations.bib}
+\usepackage{multicol}% http://ctan.org/pkg/multicols
+
+\title {Multi-Class Classification of Reddit comments}
+\author {Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
 \section*{Abstract}
@@ -19,7 +25,11 @@ The problem of automatic text classification using machine learning has been ext
 
 The Reuters-21578 dataset provides a similar number of news articles with corresponding categories for machine learning research.  Released in 1990, it provides a different type of text, given that the 20 Newsgroups are dicussions from internet users and the Reuters articles are news broadcasts not meant for interaction.  The Reuters-21578 dataset has been superceded by the RCV1 dataset, which contains over 800,000 labeled news articles.
 
+<<<<<<< HEAD
 The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.  The prediction task is to classify each abstract as a computer science, physics, statistics, or math paper.  
+=======
+The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.
+>>>>>>> 40e10b129555278370bffb5b2663516660bf47f6
 
 \section*{Data Pre-processing}
 
@@ -41,21 +51,11 @@ After raw data was pre-processed using the above steps, two sets of features wer
 
 This type of feature is simple, consisting of the word counts $n_{wd}$ in each document for all words. From this set of features, the instances of words across an entire class can easily be computed, and used in Naive Bayes classification to estimate $P(w | c)$ for every word $w$ and class $c$. The set of all words, even after stemming and filtering, was too large to be used in the scikit-learn classifiers, so several strategies were employed to select the best word counts.  First, the 2000 most frequently appearing words were selected, and found to give fairly good performance with the scikit-learn random forest classifier.  A qualitative assessment of these words assessed that many of the most common words contained no semantic information, and that the optimal feature set might lie with less frequent words that appeared in only one of the classes, so an arbitrary number of most frequent features was skipped, and the next 2000 features used.  This was found to decrease the quality of prediction, but an exhaustive search of the feature space was not performed due to the promise of TF-IDF features.
 
-
-http://www.csie.ntu.edu.tw/~r95038/Try/paper/feature%20selection%20on%20TFIDF.pdf
-
-
-Perf
-
 \subsection*{TF-IDF}
 
 Term Frequency-Inverse Document Frequency calculates $n'_{wd} = \log (n_{wd} + 1) \times log (|D| / df(w))$ where $df(\cdot)$ is the \emph{document frequency} of a word, or the number of documents containing a word. The purpose of this transformation is to compensate for the influence of common words and emphasize the influence of rare ones in word counts. While TF-IDF can compensate for rare and frequent words it does not consider document length. Document length is normalized by dividing the feature vector by the average document length, according to the $L_2$ Norm.
 
-Perf
-
 A second transformation that was explored is a class-length prior distribution for word frequencies. Word frequencies for each class were scaled by the total word count within the class. The purpose of this rescaling is to consider the words in a manner purely relative to their own class, rather than in comparison to other classes.
-
-Perf
 
 When classifying text with kNN, the dimensionality of the vector space is problematic. Although the distance metric employed accomodates higher dimensions more easily, when faced with the dimensions of the word space, some form of feature selection is required.
 
@@ -91,7 +91,7 @@ While $P(c)$ can be estimated easily by counting the raw occurences of the label
 
 While performing sums is efficient for a computer, calculating the denominator on the entire training set can prohibitive with $O(mn)$ for $m$ features and $n$ documents. To solve this issue, the sums are reversed, taking advantage of the sparsity of features within documents. While the same order-bound is preserved, given that a single abstract will not contain more than a few hundred unique words, less iterations are expected.
 
-\subsection*{Standard: (Naive Bayes with TF-IDF \& Ensemble) and kNN with TF-IDF}
+\subsection*{Standard: Naive Bayes with TF-IDF and kNN with TF-IDF}
 
 For the `standard' approach, the use of TF-IDF features was explored with multinomial naive bayes and k-Nearest Neighbours classifiers. Another approach considered was Text Weighted Complement Naive Bayes.
 
@@ -120,6 +120,7 @@ The classifiers used in this study have few parameters to select, and the most i
 
 For the kNN classifier, the number of closest training samples, $k$, could be tuned through cross-validation, but due to the time required to classify even one document, a full k-fold validation of this parameter was not performed.
 
+<<<<<<< HEAD
 \subsection*{Future Work}
 
 Changing the implementation of the Random Forest word frequency feature to use sparse matrices could allow use of all training data and increase the number of features considered.  
@@ -127,22 +128,42 @@ Changing the implementation of the Random Forest word frequency feature to use s
 
 
 \subsection*{Normalization Length}
+=======
+Given enough time and resources however, here are some of the most interesting parameters that could be tested.
+
+\subsection*{Feature Vector Length}
+
+The length of each feature vector can be normalized to a specific length. Doing so allows to consider each feature relative to the document it was a part of, rather than the absolute corpus. A side effect is correction for documents of varying lengths since each vector will add up to the same value under the norm used.
+>>>>>>> 40e10b129555278370bffb5b2663516660bf47f6
 
 \subsection*{Vocabulary size}
 
-\subsection*{Testing and Validation}
+Algorithms such as kNN suffer heavily from dimensionality, with performance dropping dramatically as the number of dimensions grows. In text classification, the number of features can easily reach over a hundred thousand, and kNN would be rendered useless. Trimming the size of the word dictionary used can force specific words to be emphasized.
+
+\subsection{Testing and Validation}
 
 \subsection*{k-fold X-Val}
 
 ROC
 
-Confusion
- 
+\includegraphics[width=0.5\textwidth]{./confusion.png}
+\includegraphics[width=0.5\textwidth]{./word_frequency.png}
+
 \section*{Discussion}
+
+Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
+
+\subsection*{Statistics Confusion}
+
+Additionally, as the ROC curve shows, there is an issue classifying the statistics papers. Investigating the source of this issue could have led to reducing error rates dramatically. Two possible sources of confusion could be undersampling in Statistics and high correlation between Statistics and CS vocabularies.
 
 \subsection*{kNN performance}
 
+While kNN is known for slow querying speed, the actual speed was not expected to be so low. This low throughput limited the exploration of kNN since the Python implementation took an estimated 23 hours to generate a Kaggle submission. For this reason, many of the interesting optimizations and choices with kNN were glossed over. Literature reviews suggest that given resources and time to run the actual algorithm performance can be quite high[cite].
+
 \subsection*{Difficulty of TF-IDF}
+
+While TF-IDF can seem like a silver bullet when dealing with unfiltered word counts, it can actual bring it's own issues. The first is that it can add a decent amount of additional work if document frequencies are calculated as their own step. Computation times can be annoying but are easily dealt with through more advanced hardware. The most important issue however, is that if words are not tokenized properly and many unique words are introduced, then scores can become problematic. Additionally, by forcing Naive Bayes to use a possibly transformed \emph{document-feature} matrix, more work is required to count the class frequencies required.
 
 \section*{Future Work}
 

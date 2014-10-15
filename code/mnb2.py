@@ -119,38 +119,37 @@ def main():
   total = load_training()
   random.shuffle(total)
   labels = load_label()
-  frac_train = int(len(total)*(0.5))
+  frac_train = int(len(total)*1.0)
   print frac_train
-  training = total[:frac_train][:100]
+  training = total[:frac_train]
   test = total[frac_train:]
 
   print 'Extracting Corpus'
   corpus = [d['abs'] for d in training]
   ids = [d['id'] for d in training]
   corpus_labels = [labels[d['id']] for d in training]
-  print 'Training'
-  n = word_counts(corpus, ids)
-  print 'Temp Vocab'
-  vocab, df = _vocab(corpus)
-  print 'Calculating TF-IDF'
-  np = normalize_tfidf(n,df,len(corpus))
-  # np2 = normalize_class_length(classes, labels, vocab, n)
-  np2 = normalize_len(np)
-  c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
-  measure(c1, classes, test, labels)
+  # print 'Training'
+  # n = word_counts(corpus, ids)
+  # print 'Temp Vocab'
   # vocab, df = _vocab(corpus)
-  # d = len(corpus)
-  # gen = kfold(10, classes, (corpus, ids, corpus_labels))
-  # for t_data, t_ids, t_labs, test in gen:
-  #   n = word_counts(t_data, t_ids)
-  #   # n = normalize_tfidf(n,df, d)
-  #   n = normalize_len(n)
-  #   c = train(classes, vocab, (t_data, t_ids), t_labs, feats=n)
-  #   labels = []
-  #   for doc in test:
-  #     labels.append(label(classes, *c, doc=doc)[0])
-  #   print gen.send(labels)
-  # output(classes, c1)
+  # print 'Calculating TF-IDF'
+  # np = normalize_tfidf(n,df,len(corpus))
+  # # np2 = normalize_class_length(classes, labels, vocab, n)
+  # np2 = normalize_len(np)
+  # c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
+  # measure(c1, classes, test, labels)
+  gen = kfold(10, classes, (corpus, ids, corpus_labels))
+  for t_data, t_ids, t_labs, test in gen:
+    vocab, df = _vocab(corpus)
+    d = len(corpus)
+    n = word_counts(t_data, t_ids)
+    # n = normalize_tfidf(n,df, d)
+    # n = normalize_len(n)
+    c = train(classes, vocab, (t_data, t_ids), t_labs, feats=n)
+    labels = []
+    for doc in test:
+      labels.append(label(classes, *c, doc=doc)[0])
+    print gen.send(labels)
   
 def kfold(k, classes, data):
   # data is tuple (text, id, label)
@@ -191,8 +190,7 @@ def measure(c, classes, test, labels):
     # print pred
     if pred == labels[d['id']]:
       correct += 1
-    else:
-      errors[labels[d['id']]][pred] += 1
+    errors[labels[d['id']]][pred] += 1
       # print "%s %s" % (d['id'], scores)
   # print "Got %s correct of %s" % (correct, test_length)  
   print errors
