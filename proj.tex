@@ -19,15 +19,6 @@ The Reuters-21578 dataset provides a similar number of news articles with corres
 
 The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.
 
-\begin {enumerate}
-\item 20newgroups
-\item reuters
-\item all mnb papers
-\item knn papers
-\item tfidf papers
-\item svd papers
-\end {enumerate}
-
 \section*{Data Pre-processing}
 
 Simple transformations were performed on the raw data to normalize it and extract the most meaning. A further stage of transformations was performed at the corpus level on the ensemble of extracted features.
@@ -48,21 +39,11 @@ After raw data was pre-processed using the above steps, two sets of features wer
 
 This type of feature is simple, consisting of the word counts $n_{wd}$ in each document for all words. From this set of features, the instances of words across an entire class can easily be computed, and used in Naive Bayes classification to estimate $P(w | c)$ for every word $w$ and class $c$. The set of all words, even after stemming and filtering, was too large to be used in the scikit-learn classifiers, so several strategies were employed to select the best word counts.  First, the 2000 most frequently appearing words were selected, and found to give fairly good performance with the scikit-learn random forest classifier.  A qualitative assessment of these words assessed that many of the most common words contained no semantic information, and that the optimal feature set might lie with less frequent words that appeared in only one of the classes, so an arbitrary number of most frequent features was skipped, and the next 2000 features used.  This was found to decrease the quality of prediction, but an exhaustive search of the feature space was not performed due to the promise of TF-IDF features.
 
-
-http://www.csie.ntu.edu.tw/~r95038/Try/paper/feature%20selection%20on%20TFIDF.pdf
-
-
-Perf
-
 \subsection*{TF-IDF}
 
 Term Frequency-Inverse Document Frequency calculates $n'_{wd} = \log (n_{wd} + 1) \times log (|D| / df(w))$ where $df(\cdot)$ is the \emph{document frequency} of a word, or the number of documents containing a word. The purpose of this transformation is to compensate for the influence of common words and emphasize the influence of rare ones in word counts. While TF-IDF can compensate for rare and frequent words it does not consider document length. Document length is normalized by dividing the feature vector by the average document length, according to the $L_2$ Norm.
 
-Perf
-
 A second transformation that was explored is a class-length prior distribution for word frequencies. Word frequencies for each class were scaled by the total word count within the class. The purpose of this rescaling is to consider the words in a manner purely relative to their own class, rather than in comparison to other classes.
-
-Perf
 
 When classifying text with kNN, the dimensionality of the vector space is problematic. Although the distance metric employed accomodates higher dimensions more easily, when faced with the dimensions of the word space, some form of feature selection is required.
 
@@ -135,13 +116,23 @@ For the kNN classifier, the number of closest training samples, $k$, could be tu
 
 ROC
 
-Confusion
- 
+\includegraphics[width=0.5\textwidth]{./confusion.png}
+\includegraphics[width=0.5\textwidth]{./word_frequency.png}
 \section*{Discussion}
+
+Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
+
+\subsection*{Statistics Confusion}
+
+Additionally, as the ROC curve shows, there is an issue classifying the statistics papers. Investigating the source of this issue could have led to reducing error rates dramatically. Two possible sources of confusion could be undersampling in Statistics and high correlation between Statistics and CS vocabularies.
 
 \subsection*{kNN performance}
 
+While kNN is known for slow querying speed, the actual speed was not expected to be so low. This low throughput limited the exploration of kNN since the Python implementation took an estimated 23 hours to generate a Kaggle submission. For this reason, many of the interesting optimizations and choices with kNN were glossed over. Literature reviews suggest that given resources and time to run the actual algorithm performance can be quite high[cite].
+
 \subsection*{Difficulty of TF-IDF}
+
+While TF-IDF can seem like a silver bullet when dealing with unfiltered word counts, it can actual bring it's own issues. The first is that it can add a decent amount of additional work if document frequencies are calculated as their own step. Computation times can be annoying but are easily dealt with through more advanced hardware. The most important issue however, is that if words are not tokenized properly and many unique words are introduced, then scores can become problematic. Additionally, by forcing Naive Bayes to use 
 
 \section*{Future Work}
 
