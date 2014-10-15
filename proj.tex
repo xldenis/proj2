@@ -7,7 +7,7 @@
 \addbibresource{citations.bib}
 \usepackage{multicol}% http://ctan.org/pkg/multicols
 
-\title {Multi-Class Classification of Reddit comments}
+\title {Multi-Class Classification of Scientific Articles}
 \author {Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
@@ -26,7 +26,7 @@ The problem of automatic text classification using machine learning has been ext
 
 The Reuters-21578 dataset provides a similar number of news articles with corresponding categories for machine learning research.  Released in 1990, it provides a different type of text, given that the 20 Newsgroups are dicussions from internet users and the Reuters articles are news broadcasts not meant for interaction.  The Reuters-21578 dataset has been superceded by the RCV1 dataset, which contains over 800,000 labeled news articles.
 
-The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.  The prediction task is to classify each abstract as a computer science, physics, statistics, or math paper.  
+The dataset under consideration here is different in that the full text of the articles are not available; only a part of the complete data is available, the abstract.  The prediction task is to classify each abstract as a computer science, physics, statistics, or math paper.
 
 \section*{Data Pre-processing}
 
@@ -38,7 +38,9 @@ Mathematical equations in latex generally appear as a mathematical expression be
 
 \subsection*{Text Normalization}
 
-After removing all latex formatting, the text is normalized using standard techniques[cite]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.
+After removing all latex formatting, the text is normalized using standard techniques[cite]. First the entire document is transformed to lowercase, reducing vocabulary size significantly. Next, it is broken up into word chunks by spaces, removing all punctuation in the process. Theses two approaches can reduce the size of the vocabulary significantly. A Porter stemmer [cite] was employed to reduce words to their root.  For example, after stemming, the words ``quantum'' and ``quanta'' are considered equivalent, and counted together. The Porter stemmer groups different verb tenses, adjectives and nouns that have identical semantic meaning, and plurals of words.  The main advantage of employing the Porter stemmer is the reduction of sparsity of the features by grouping features into semantic groups.  It was found that using the stemmer reduced the size of the corpus vocabulary by approximately $25\%$.  To further reduce the size of the vocabulary, words of length less than 4 characters were discarded, which reduced our feature space by approximately $20\%$.  As the final step to pre-processing the abstract data, a list of English stop words, was filtered out of our feature matrices.  These stop words represent the most common words in the English language, and are assumed not to have any information about the contents of the document.  For example, words like ``a'', ``then'', and ``but'' cannot be expected to contain information about what type of document they appear in, but may appear to correlate to one of the classes in the training set and result in overfitting.  Figure 1 shows the 20 most frequent words in the dataset longer than 3 characters, including stop words, and with the possible exception of ``algorithm'', none of them are very indicative of a categorical context.
+
+\includegraphics[width=0.5\textwidth]{./word_frequency.png}
 
 \section*{Feature Design and Selection}
 
@@ -125,6 +127,8 @@ For the kNN classifier, the number of closest training samples, $k$, could be tu
 
 Changing the implementation of the Random Forest word frequency feature to use sparse matrices could allow use of all training data and increase the number of features considered.  
 
+\subsection*{Normalization Length}
+
 Given enough time and resources however, here are some of the most interesting parameters that could be tested.
 
 \subsection*{Feature Vector Length}
@@ -141,6 +145,16 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
 
 \begin{figure}
   \centering
+  \includegraphics[width=0.5\textwidth]{./confusion.png}
+  \label{confusion}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./word_frequency.png}
+  \label{freq}
+\end{figure}
+\begin{figure}
+  \centering
   \begin{tabular}{|l || r|}
   \hline
   Feature & Mis-Classifcation\\
@@ -154,11 +168,7 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
   \caption {Mis-Classification rates for different features used by Naive Bayes. The $a$ subscript indicates that the feature vectors were length normalized. All values were calculated after 10-fold cross-validation on the entire training set.}
 \end{figure}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.5\textwidth]{./confusion.png}
-  \label{confusion}
-\end{figure}
+
 \section*{Discussion}
 
 Overall, classification was relatively accurate with an $87\%$ TP rate acheived on the public Kaggle data. However, a few mistakes were made that could have impacted performance of the algorithms. Using the vocabulary of the test data can help extract features that will only be relevant to that data.  While in a more general setting this could easily lead to overfitting and pollution of error estimates, since all the test data was available, overfitting could lead to better results. 
