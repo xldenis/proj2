@@ -138,7 +138,7 @@ def main():
   # np = normalize_tfidf(n,df,len(corpus))
   # np2 = normalize_class_length(classes, labels, vocab, n)
   # np2 = normalize_len(np)
-  c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
+  c1 = train(classes, vocab, (corpus, ids), corpus_labels, n)
   measure(c1, classes, test, labels)
   # gen = kfold(10, classes, (corpus, ids, corpus_labels))
   # for t_data, t_ids, t_labs, test in gen:

@@ -11,11 +11,15 @@
 \author {Team Awesome: Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
+\twocolumn[
 \maketitle
+
 \section*{Abstract}
 
 Classification of text documents has been well-studied for some types of text, but state-of-the-art algorithms have not been tested on scientific journal articles.  A study was performed on a new, large dataset consisting of abstract text for four types of articles: computer science, statistics, physics and math. A baseline Naive Bayesian classifier is compared to the more advanced k-Nearest Neighbours and Random Forest classifiers, with an emphasis on feature extraction and selection techniques.
-
+\\
+\\
+]
 \section*{Introduction}
 
 Categorization of articles in scientific journals is a useful step towards making it easy for future researchers to find and build upon the body of knowledge in their field. Normally, it is fairly obvious to a human editor how to categorize a new article, so an automated system to classify documents is unnecessary.  However, with the rise of open access journals, more and more articles are being indexed into journals other than the ones they were published in, which might use a different categorization scheme.  When a one-to-one mapping of categories is impossible, it can be time-consuming to review large numbers of articles and find a suitable category from within the new categorization.
@@ -128,10 +132,14 @@ The length of each feature vector can be normalized to a specific length. Doing 
 
 Algorithms such as kNN suffer heavily from dimensionality, with performance dropping dramatically as the number of dimensions grows. In text classification, the number of features can easily reach over a hundred thousand, and kNN would be rendered useless. Trimming the size of the word dictionary used can force specific words to be emphasized.
 
+
+\section*{Testing and Validation}
+
 \begin{figure}
   \centering
   \includegraphics[width=0.5\textwidth]{./confusion.png}
   \label{confusion}
+  \caption{The rows correspond to the lables \{Math, Physics, Statistics, CS\}.}
 \end{figure}
 
 \begin{figure}
