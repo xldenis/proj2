@@ -6,8 +6,9 @@ from nltk.stem import PorterStemmer
 import re
 import itertools
 
+stop = set([ l.strip() for l in open('english.stop')])
+
 def strip(doc):
-  stop = set([ l.strip() for l in open('english.stop')])
   ps = PorterStemmer()
   words = re.findall('[\w-]+', re.sub('\$.*?\$','math123', doc.lower()))
   return [ps.stem(w) for w in words if w not in stop and len(w) >= 4]
@@ -45,7 +46,7 @@ def normalize_tfidf(n, df, d):
         np[doc][w] = t
   return np
 
-def normalize_tfidf_len(n):
+def normalize_len(n):
   np = {}
   avg = 0
   for doc in n.keys():
@@ -112,55 +113,70 @@ def label(classes, vocab, prior, probs, doc):
 
   return max(score, key=score.get), score
 
-def main():
+def main(): 
   classes = ['physics', 'cs', 'math', 'stat']
 
   total = load_training()
   random.shuffle(total)
   labels = load_label()
-  frac_train = int(len(total)*(1.0))
+  frac_train = int(len(total)*(0.5))
   print frac_train
-  training = total[:frac_train]
+  training = total[:frac_train][:100]
   test = total[frac_train:]
 
   print 'Extracting Corpus'
   corpus = [d['abs'] for d in training]
   ids = [d['id'] for d in training]
   corpus_labels = [labels[d['id']] for d in training]
-  # print 'Training'
-  # n = word_counts(corpus, ids)
-  # print 'Temp Vocab'
-  # vocab, df = _vocab(corpus)
-  # print 'Calculating TF-IDF'
-  # np = normalize_tfidf(n,df,len(corpus))
+  print 'Training'
+  n = word_counts(corpus, ids)
+  print 'Temp Vocab'
+  vocab, df = _vocab(corpus)
+  print 'Calculating TF-IDF'
+  np = normalize_tfidf(n,df,len(corpus))
   # np2 = normalize_class_length(classes, labels, vocab, n)
-  # np2 = normalize_tfidf_len(np)
-  # c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
-  # c2 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
-  # compare(c1, c2, classes, test, labels)
-  # measure(c1, classes, test, labels)
-  kfold(10, classes, (corpus, ids, corpus_labels))
+  np2 = normalize_len(np)
+  c1 = train(classes, vocab, (corpus, ids), corpus_labels, np2)
+  measure(c1, classes, test, labels)
+  # vocab, df = _vocab(corpus)
+  # d = len(corpus)
+  # gen = kfold(10, classes, (corpus, ids, corpus_labels))
+  # for t_data, t_ids, t_labs, test in gen:
+  #   n = word_counts(t_data, t_ids)
+  #   # n = normalize_tfidf(n,df, d)
+  #   n = normalize_len(n)
+  #   c = train(classes, vocab, (t_data, t_ids), t_labs, feats=n)
+  #   labels = []
+  #   for doc in test:
+  #     labels.append(label(classes, *c, doc=doc)[0])
+  #   print gen.send(labels)
   # output(classes, c1)
-
+  
 def kfold(k, classes, data):
   # data is tuple (text, id, label)
   # params is list of values to test
   k_size = int(round(len(data[0])/ k))
-  groups = [data[i:i + k_size] for i in range(0, len(data), k_size)]
-  vocab, df = _vocab(data[0])
+  groups = [(data[0][i:i + k_size],data[1][i:i + k_size],data[2][i:i + k_size]) for i in range(0, len(data[0]), k_size)]
   errors = [0] * k
   for i in range(0,k):
     print 'Fold %d' % i
     test = groups[i]
-    train = list(itertools.chain(*(groups[:i]+groups[i+1:])))
-    n = word_counts(train[0], train_ids[1])
-    c = train(classes, vocab, *train, feats=n)
-    for d in test:
-      pred = label(c, *c, doc=d[0])
-      if pred == d[2]:
+    t_data, t_ids, t_labs = [],[],[]
+    for j in range(0,k):
+      if j != i:
+        t_data += (groups[j][0])
+        t_ids += (groups[j][1])
+        t_labs += (groups[j][2])
+
+    preds = yield (t_data, t_ids, t_labs, test[0])
+    yield None
+    # for d in zip(*test):
+    for j in range(len(zip(*test))):
+      if preds[j] != zip(*test)[j][2]:
         errors[i] += 1
     print errors
-  print float(sum(errors))/len(errors)
+  print float(sum(errors))/len(errors)/len(test[0])
+
 
 def measure(c, classes, test, labels):
   print 'Testing'
@@ -168,7 +184,8 @@ def measure(c, classes, test, labels):
   both_wrong = 0
   one_right  = 0
   errors = defaultdict(lambda:defaultdict(lambda:0))
-  test_length = 1000
+  test_length = len(test)
+  # print len(test)
   for d in test[:test_length]:
     pred,scores = label(classes,*c,doc=d['abs'])
     # print pred
