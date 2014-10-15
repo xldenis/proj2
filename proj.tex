@@ -46,6 +46,12 @@ After raw data was pre-processed using the above steps, two sets of features wer
 
 \subsection*{Word Count}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./word_frequency.png}
+  \label{freq}
+\end{figure}
+
 This type of feature is simple, consisting of the word counts $n_{wd}$ in each document for all words. From this set of features, the instances of words across an entire class can easily be computed, and used in Naive Bayes classification to estimate $P(w | c)$ for every word $w$ and class $c$. The set of all words, even after stemming and filtering, was too large to be used in the scikit-learn classifiers, so several strategies were employed to select the best word counts.  First, the 2000 most frequently appearing words were selected, and found to give fairly good performance with the scikit-learn random forest classifier.  A qualitative assessment of these words assessed that many of the most common words contained no semantic information, and that the optimal feature set might lie with less frequent words that appeared in only one of the classes, so an arbitrary number of most frequent features was skipped, and the next 2000 features used.  This was found to decrease the quality of prediction, but an exhaustive search of the feature space was not performed due to the promise of TF-IDF features.
 
 \subsection*{TF-IDF}
@@ -84,7 +90,7 @@ In order to establish a baseline for future algorithms, the simplest version of 
 
 While $P(c)$ can be estimated easily by counting the raw occurences of the label $c$ within the training data, $P(w|c)$ requires more work. $P(w|c)$ is estimated by the following formula:
 
-\[\frac {\sum_{d \in D_c} n_{wd}} {\sum_{w'} 2\sum_{d\in D_c} n_{wd}} \]
+\[\frac {\sum_{d \in D_c} n_{wd}} {\sum_{w'} \sum_{d\in D_c} n_{wd}} \]
 
 While performing sums is efficient for a computer, calculating the denominator on the entire training set can prohibitive with $O(mn)$ for $m$ features and $n$ documents. To solve this issue, the sums are reversed, taking advantage of the sparsity of features within documents. While the same order-bound is preserved, given that a single abstract will not contain more than a few hundred unique words, less iterations are expected.
 
@@ -102,8 +108,6 @@ sim(A,B) = \frac {\sum_{w \in A \cap B} A_w \times B_w} {\| A \| \| B \|}
 Where $A,B$ are TF-IDF vectors. Once the metric function is defined, kNN simply becomes a matter of iterating over the training set to find the $k$ documents with the highest scores. To label a test document, the most frequent of the $k$ nearest labels is chosen.
 
 The primary difficulty with kNN is that each query will be computationally expensive, because each test sample must be compared to every sample in the training set. Due to this requirement, the trick used for efficiency in Naive Bayes couldn't be used, requiring an inner loop of 80,000 iterations if all the training data is used. This issue is why feature selection and reduction is paramount in kNN, since it will significantly reduce computation time.
-
-\subsection*{Optimization of kNN}
 
 \subsection*{Advanced: Random Forests}
 
@@ -126,7 +130,6 @@ Given enough time and resources however, here are some of the most interesting p
 \subsection*{Feature Vector Length}
 
 The length of each feature vector can be normalized to a specific length. Doing so allows to consider each feature relative to the document it was a part of, rather than the absolute corpus. A side effect is correction for documents of varying lengths since each vector will add up to the same value under the norm used.
->>>>>>> 40e10b129555278370bffb5b2663516660bf47f6
 
 \subsection*{Vocabulary size}
 
@@ -136,17 +139,6 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
 
 \subsection*{k-fold X-Val}
 
-ROC
-\begin{figure}
-  \centering
-  \includegraphics[width=0.5\textwidth]{./confusion.png}
-  \label{confusion}
-\end{figure}
-\begin{figure}
-  \centering
-  \includegraphics[width=0.5\textwidth]{./word_frequency.png}
-  \label{freq}
-\end{figure}
 \begin{figure}
   \centering
   \begin{tabular}{|l || r|}
@@ -160,6 +152,12 @@ ROC
   \hline
   \end{tabular}
   \caption {Mis-Classification rates for different features used by Naive Bayes. The $a$ subscript indicates that the feature vectors were length normalized. All values were calculated after 10-fold cross-validation on the entire training set.}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./confusion.png}
+  \label{confusion}
 \end{figure}
 \section*{Discussion}
 
@@ -177,6 +175,5 @@ While kNN is known for slow querying speed, the actual speed was not expected to
 
 While TF-IDF can seem like a silver bullet when dealing with unfiltered word counts, it can actual bring it's own issues. The first is that it can add a decent amount of additional work if document frequencies are calculated as their own step. Computation times can be annoying but are easily dealt with through more advanced hardware. The most important issue however, is that if words are not tokenized properly and many unique words are introduced, then scores can become problematic. Additionally, by forcing Naive Bayes to use a possibly transformed \emph{document-feature} matrix, more work is required to count the class frequencies required.
 
-\section*{Future Work}
 
 \end {document}
