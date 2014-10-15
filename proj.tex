@@ -11,6 +11,7 @@
 \author {Xavier Denis, Andrew Doyle, Kashif Javed}
 
 \begin{document}
+\maketitle
 \section*{Abstract}
 
 Classification of text documents has been well-studied for some types of text, but state-of-the-art algorithms have not been tested on scientific journal articles.  A study was performed on a new, large dataset consisting of abstract text for four types of articles: computer science, statistics, physics and math. A baseline Naive Bayesian classifier is compared to the more advanced k-Nearest Neighbours and Random Forest classifiers, with an emphasis on feature extraction and selection techniques.
@@ -122,7 +123,6 @@ For the kNN classifier, the number of closest training samples, $k$, could be tu
 
 Changing the implementation of the Random Forest word frequency feature to use sparse matrices could allow use of all training data and increase the number of features considered.  
 
-
 \subsection*{Normalization Length}
 
 Given enough time and resources however, here are some of the most interesting parameters that could be tested.
@@ -139,9 +139,32 @@ Algorithms such as kNN suffer heavily from dimensionality, with performance drop
 
 \subsection*{k-fold X-Val}
 
-ROC
-
 \includegraphics[width=0.5\textwidth]{./confusion.png}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./confusion.png}
+  \label{confusion}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{./word_frequency.png}
+  \label{freq}
+\end{figure}
+\begin{figure}
+  \centering
+  \begin{tabular}{|l || r|}
+  \hline
+  Feature & Mis-Classifcation\\
+  \hline
+  Word Count     & 0.133135848664 \\
+  TF-IDF         & 0.146835048332 \\
+  TF-IDF$_a$     & 0.149942833385 \\
+  Word Count$_a$ & 0.145837231057 \\
+  \hline
+  \end{tabular}
+  \caption {Mis-Classification rates for different features used by Naive Bayes. The $a$ subscript indicates that the feature vectors were length normalized. All values were calculated after 10-fold cross-validation on the entire training set.}
+\end{figure}
 
 \section*{Discussion}
 

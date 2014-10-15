@@ -4,3 +4,7 @@
 *.gz
 *.log
 *.fdb_latexmk
+*.bbl
+*.bcf
+*.blg
+*.run.xml
